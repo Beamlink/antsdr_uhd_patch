@@ -225,7 +225,11 @@ private:
                      * --> throw AssertionError!
                      */
                     accum_timeout += short_timeout;
-                    UHD_ASSERT_THROW(accum_timeout < _timeout);
+                    try {
+                       UHD_ASSERT_THROW(accum_timeout < _timeout);
+                    } catch (const std::exception& ex){
+                       UHD_LOGGER_ERROR("Accumulated timeout has exceeded the timeout limit");
+                    }
                 }
 
                 pkt                            = resp_buff.data;
@@ -262,7 +266,7 @@ private:
                 UHD_ASSERT_THROW(packet_info.num_payload_words32 == 2);
                 UHD_ASSERT_THROW(packet_info.packet_type == _packet_type);
             } catch (const std::exception& ex) {
-                throw uhd::io_error(
+                UHD_LOGGER_ERROR(
                     str(boost::format("Radio ctrl (%s) packet parse error - %s") % _name
                         % ex.what()));
             }
